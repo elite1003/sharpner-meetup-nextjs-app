@@ -1,4 +1,5 @@
-import MeetupList from "../components/meetups/MeetupList";
+import MeetupDetail from "@/components/meetups/MeetupDetail";
+import { useRouter } from "next/router";
 
 const DUMMY_MEETUPS = [
   {
@@ -19,8 +20,12 @@ const DUMMY_MEETUPS = [
   },
 ];
 
-function HomePage() {
-  return <MeetupList meetups={DUMMY_MEETUPS} />;
-}
+const MeetUpIdPage = () => {
+  const router = useRouter();
+  const id = router.query.meetupId;
+  const meetup = DUMMY_MEETUPS.find((meetup) => meetup.id === id);
 
-export default HomePage;
+  return <MeetupDetail {...meetup} />;
+};
+
+export default MeetUpIdPage;

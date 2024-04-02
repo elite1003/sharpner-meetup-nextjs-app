@@ -1,8 +1,18 @@
 import MeetupDetail from "@/components/meetups/MeetupDetail";
+import Head from "next/head";
 import { MongoClient, ObjectId } from "mongodb";
+import { Fragment } from "react";
 
 export default function MeetUpIdPage(props) {
-  return <MeetupDetail {...props.meetup} />;
+  return (
+    <Fragment>
+      <Head>
+        <title>{props.meetup.title}</title>
+        <meta name="description" content={props.meetup.description} />
+      </Head>
+      <MeetupDetail {...props.meetup} />
+    </Fragment>
+  );
 }
 export async function getStaticPaths() {
   const client = await MongoClient.connect(

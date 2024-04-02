@@ -1,59 +1,46 @@
 import MeetupDetail from "@/components/meetups/MeetupDetail";
+import { MongoClient, ObjectId } from "mongodb";
 
 export default function MeetUpIdPage(props) {
   return <MeetupDetail {...props.meetup} />;
 }
 export async function getStaticPaths() {
+  const client = await MongoClient.connect(
+    "mongodb+srv://sudhirkumar10397:LbVP11B5VfoXcPDm@cluster0.wrztaxt.mongodb.net/meetups?retryWrites=true&w=majority&appName=Cluster0"
+  );
+  const db = client.db();
+  const meetupsCollection = db.collection("meetups");
+  const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
+  client.close();
+
   return {
-    paths: [
-      {
-        params: {
-          meetupId: "m1",
-        },
-      },
-      {
-        params: {
-          meetupId: "m2",
-        },
-      },
-    ],
-    fallback: true,
+    fallback: "blocking",
+    paths: meetups.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
   };
 }
 
 export async function getStaticProps(context) {
   const meetupId = context.params.meetupId;
-  //data fetching step
-  const DUMMY_MEETUPS = [
-    {
-      id: "m1",
-      title: "A First Meetup",
-      image:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-      address: "Some address 5, 12345 Some City",
-      description: "This is a first meetup!",
-    },
-    {
-      id: "m2",
-      title: "A Second Meetup",
-      image:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-      address: "Some address 10, 12345 Some City",
-      description: "This is a second meetup!",
-    },
-    {
-      id: "m3",
-      title: "A Third Meetup",
-      image:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-      address: "Some address 5, 12345 Some City",
-      description: "This is a Third meetup!",
-    },
-  ];
-  const meetup = DUMMY_MEETUPS.find((meetup) => meetup.id === meetupId);
+  const client = await MongoClient.connect(
+    "mongodb+srv://sudhirkumar10397:LbVP11B5VfoXcPDm@cluster0.wrztaxt.mongodb.net/meetups?retryWrites=true&w=majority&appName=Cluster0"
+  );
+  const db = client.db();
+  const meetupsCollection = db.collection("meetups");
+  const selectedMeetup = await meetupsCollection.findOne({
+    _id: new ObjectId(meetupId),
+  });
+  client.close();
   return {
     props: {
-      meetup,
+      meetup: {
+        id: selectedMeetup._id.toString(),
+        title: selectedMeetup.title,
+        address: selectedMeetup.address,
+        image: selectedMeetup.image,
+        description: selectedMeetup.description,
+      },
     },
   };
 }
